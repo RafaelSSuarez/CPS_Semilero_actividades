@@ -156,19 +156,22 @@ def is_valid_word(word, hand, word_list):
     def match_with_gaps(my_word, other_word):
          largo_palabra_mia=len(my_word)
          largo_otra_palabra=len(other_word)
-         coincide=True
+         coincide=False
          if largo_palabra_mia==largo_otra_palabra:
              for A in range(largo_palabra_mia):
                  if my_word[A]!='*':
-                     if my_word[A]!=other_word[A]:
-                         coincide=False
-                         break
+                     if my_word[A]==other_word[A]:
+                         coincide=True
+                     else:
+                        coincide=False
+                        break
                  else:
-                     if not VOWELS.find(other_word[A]):
+                     if VOWELS.find(other_word[A])!=-1:
+                         coincide=True
+                     else:
                          coincide=False
                          break
-         else:
-             coincide=False
+    
          return(coincide)
      
     def verificar_lista_palabras(word, wordlist):
@@ -201,12 +204,14 @@ def is_valid_word(word, hand, word_list):
     return verificar_lista_palabras(word, word_list) and verificar_mano(word, hand)       
             
 
-# TO DO... Remove this line when you implement this function
-
 #
 # Problem #5: Playing a hand
 #
 def calculate_handlen(hand):
+    suma=0
+    for A in hand.keys():
+        suma=suma+hand[A]
+    return suma
     """ 
     Returns the length (number of letters) in the current hand.
     
@@ -214,10 +219,27 @@ def calculate_handlen(hand):
     returns: integer
     """
     
-    pass  # TO DO... Remove this line when you implement this function
 
 def play_hand(hand, word_list):
-
+    terminar=False
+    puntos=0
+    while not terminar:
+        print("Current hand: ")
+        display_hand(hand)
+        palabra=input("Enter word, or !! to indicate that you are finished: ")
+        if palabra == "!!":
+            terminar=True
+        else:
+            if is_valid_word(palabra, hand, word_list):
+                puntos=puntos+get_word_score(palabra, calculate_handlen(hand))
+                print(palabra,"earned:",get_word_score(palabra, calculate_handlen(hand)),"points. Total:",puntos,"points \n")
+                hand=update_hand(hand, palabra)
+            else:
+                print("Please enter a valid word\n")
+        if calculate_handlen(hand)==0:
+            print("Ran out of letters.")
+            terminar=True
+    print("Total score:",puntos,"Points.\n")
     """
     Allows the user to play the given hand, as follows:
 
@@ -291,6 +313,16 @@ def play_hand(hand, word_list):
 #
 
 def substitute_hand(hand, letter):
+    letter=letter.lower()
+    nueva_mano=hand.copy()
+    if letter in hand:
+        conjunto="".join(map(str,string.ascii_lowercase-nueva_mano.keys()))
+        nueva_letra=random.choice(conjunto)
+        nueva_mano[nueva_letra]=nueva_mano[letter]
+        del(nueva_mano[letter])
+    return nueva_mano    
+        
+        
     """ 
     Allow the user to replace all copies of one letter in the hand (chosen by user)
     with a new letter chosen from the VOWELS and CONSONANTS at random. The new letter
@@ -313,10 +345,41 @@ def substitute_hand(hand, letter):
     returns: dictionary (string -> int)
     """
     
-    pass  # TO DO... Remove this line when you implement this function
-       
+
     
 def play_game(word_list):
+    numero_manos=input("Enter total number of hands: ")
+    numero_manos=int(numero_manos)
+    while numero_manos>0: 
+        hand=deal_hand(HAND_SIZE)
+        arrancar=False
+        cambiar_mano=False
+        while not arrancar:
+          print("Current hand:")
+          display_hand(hand)
+          confirm_cambio_letra=input("Would you like to substitute a letter?: ")
+          if confirm_cambio_letra!='no':
+              if confirm_cambio_letra!='yes':
+                  print("I don't understand, try again")
+              else:
+                  letra_para_cambiar=input("Which letter would you like to replace: ")
+                  hand=substitute_hand(hand, letra_para_cambiar)
+                  arrancar=True
+          else:
+              arrancar=True
+        while not cambiar_mano:
+          play_hand(hand, word_list)
+          print("_______________")
+          confirm_misma_mano=input("Would you like to replay the hand? ")
+          if confirm_misma_mano=="yes":
+              cambiar_mano=False
+          elif confirm_misma_mano=="no":
+              cambiar_mano=True
+          else:
+              print("I didn't understand your answer, I think it's no")
+              cambiar_mano=True
+        numero_manos=numero_manos-1      
+        
     """
     Allow the user to play a series of hands
 
@@ -347,8 +410,7 @@ def play_game(word_list):
     word_list: list of lowercase strings
     """
     
-    print("play_game not implemented.") # TO DO... Remove this line when you implement this function
-    
+   
 
 
 #
